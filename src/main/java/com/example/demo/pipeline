@@ -1,0 +1,69 @@
+pipeline {
+  agent any
+  tools {
+    // Use Maven and SonarQube scanner
+    maven 'Maven 3.8.1'
+    sonarqube 'My SonarQube Server'
+  }
+  environment {
+    // Define environment variables
+    DOCKER_REGISTRY = 'my-registry.com'
+    K8S_NAMESPACE = 'my-namespace'
+  }
+  stages {
+    stage('Checkout') {
+      steps {
+        // Checkout code from Git repository
+        git 'https://github.com/Teja-Chittamuri/Java-springboot-appcode.git'
+      }
+    }
+    
+    stage('Build') {
+      steps {
+        // Build project and run tests
+        sh 'mvn clean package'
+      }
+    }
+    
+    stage('SonarQube Analysis') {
+      steps {
+        // Run SonarQube analysis
+        withSonarQubeEnv('My SonarQube Server') {
+          sh 'mvn sonar:sonar'
+        }
+      }
+    }
+    
+    stage('Build and Push Docker Image') {
+      steps {
+        // Build Docker image
+        sh "docker build -t ${DOCKER_REGISTRY}/myproject:${BUILD_NUMBER} ."
+        // Login to Docker registry
+        withCredentials([usernamePassword(credentialsId: 'docker-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+          sh "docker login -u ${DOCKER_USER} -p ${DOCKER_PASS} ${DOCKER_REGISTRY}"
+        }
+        // Push Docker image to registry
+        sh "docker push ${DOCKER_REGISTRY}/myproject:${BUILD_NUMBER}"
+      }
+    }
+    
+    stage('Deploy to Kubernetes') {
+      steps {
+        // Deploy application to Kubernetes
+        withKubeConfig(credentialsId: 'kubeconfig', kubeconfigId: 'kubeconfig', namespace: "${K8S_NAMESPACE}") {
+          sh "kubectl apply -f kubernetes/deployment.yaml"
+        }
+      }
+    }
+    
+    stage('Argo CD Sync') {
+      steps {
+        // Sync application to Argo CD
+        withCredentials([string(credentialsId: 'argocd-token', variable: 'ARGO_TOKEN')]) {
+          sh "argocd --grpc-web --insecure --server argocd-server.mydomain.com --grpc-web-root-path /argocd login --username admin --password ${ARGO_TOKEN}"
+          sh "argocd --grpc-web --insecure --server argocd-server.mydomain.com --grpc-web-root-path /argocd app sync myproject --namespace ${K8S_NAMESPACE}"
+        }
+      }
+    }
+  }
+}

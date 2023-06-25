@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment            
+metadata:
+  name: kp
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: kp
+  template:
+    metadata:
+      labels:
+        app: kp
+    spec:
+      containers:
+      - name: kp
+        image: kp:123
+        ports:
+        - containerPort: 8081
