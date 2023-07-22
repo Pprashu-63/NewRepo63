@@ -5,7 +5,7 @@
 #ENTRYPOINT ["java","-jar","/app.jar"]
 
 # Use an official OpenJDK runtime as the base image
-FROM openjdk:11-jre-slim
+FROM eclipse-temurin
 
 # Set the working directory inside the container
 WORKDIR /app
