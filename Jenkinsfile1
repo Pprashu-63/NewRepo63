@@ -1,0 +1,16 @@
+pipeline
+agent any |{
+    stages{
+        stage(checkout)
+        {
+            git ""
+            sh (clean)
+        }
+        stage(build)
+        {
+            git""
+            sh (compile)
+        }
+
+    }
+} 

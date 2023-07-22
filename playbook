@@ -1,0 +1,8 @@
+---
+-name: installing nginx
+  hosts:all
+  tasks:
+    -name: nginx installation:
+    apt:
+         name: nginx
+         state: present
