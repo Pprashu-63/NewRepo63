@@ -7,6 +7,8 @@
 # Use an official OpenJDK runtime as the base image
 FROM eclipse-temurin
 
+EXPOSE 8081
+
 # Set the working directory inside the container
 WORKDIR /app
 
