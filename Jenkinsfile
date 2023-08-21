@@ -1,16 +1,34 @@
 pipeline
- {
-    agent any {
-      stage('SCM') {
-        git 'https://github.com/Pprashu-63/NewRepo63.git'
-      }
-      stage('SonarQube Analysis')
-       {
-        withSonarQubeEnv()
+{
+    agent any
+
+    stages
+    {
+        stage('Checkout')
         {
-          sh "./gradlew sonar"
+            steps
+            {
+                git 'https://github.com/Pprashu-63/NewRepo63.git'
+            }
         }
-      }
-    }
-    }
+
+        stage('Build')
+         {
+            steps
+            {
+                mvn 'clean'
+            }
+        }
+
+          stage('SonarQube Analysis')
+          {
+              withSonarQubeEnv()
+              {
+                  sh "./gradlew sonar"
+              }
+           }
+        }
+     }
+
+
 
