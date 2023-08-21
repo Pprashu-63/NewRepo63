@@ -33,7 +33,7 @@
 
 node {
   stage('SCM') {
-    checkout scm
+    git 'https://github.com/Pprashu-63/NewRepo63.git'
   }
   stage('SonarQube Analysis') {
     withSonarQubeEnv() {
